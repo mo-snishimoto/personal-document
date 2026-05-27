@@ -13,6 +13,7 @@
 \usepackage{tikz}
 \usepackage{subcaption}
 \usepackage{multirow}
+\usepackage{amssymb}
 \title{Description about conservative horizontal momentum diffusion scheme and tensorial stress option in LFRic}
 \author{Shusuke Nishimoto}
 \date{\hfill}
@@ -26,8 +27,8 @@ In LFRic's Smagorinsky scheme and blending boundary layer scheme \cite{boutle14}
   \frac{\partial u_i}{\partial t} = -\frac{1}{\rho} \frac{\partial F^{u_i, x_j} }{\partial x_j} \quad\quad \left( F^{u_i, x_j} = -\rho\nu \frac{\partial u_i}{\partial x_j} \right),
   \label{eq:base}
 \end{equation}
-where $\rho$ and $\nu$ are density and mixing coefficient, respectively. $u_i$ and $x_i$ are 3-dimensional velocity and coordinate following Einstein's notation rule.
-Imcompressive formulation is adopted, and density is ignored in the horizontal diffusion, so each $F^{u_i, x_j}$ is represented as follows:
+where $\rho$ and $\nu$ are density and mixing coefficient, respectively. $u_i$ and $x_i$ are 3-dimensional cartesian velocity and coordinate following Einstein's notation rule.
+Imcompressive formulation is adopted, so density is ignored in the horizontal diffusion, so each $F^{u_i, x_j}$ is represented as follows:
 \begin{equation*}
   F^{ux} = -\nu \frac{\partial u}{\partial x}, \quad
   F^{uy} = -\nu \frac{\partial u}{\partial y}, \quad
@@ -163,7 +164,7 @@ Please see Figure\ref{fig:def_point_uflux} for placement of each term in (\ref{e
 Since adjacent cells share the same $F^{ux} A^{x}$ and $F^{uy} A^{y}$ at their boundary, the increment of total volume-weighed $u$ is cancelled out by summing up (\ref{eq:disc_diff_u}) and ignoring the effect of lateral boundary condition:
 \vspace{-5pt}
 \begin{equation}
-  \Delta \left( \sum_{i,j} V_{i+\frac{1}{2},j,k} u_{i+\frac{1}{2},j,k} \right) = \sum_{i,j} V_{i+\frac{1}{2},j,k} \Delta u_{i+\frac{1}{2},j,k} = 0,
+  \Delta \left( \sum_{i,j,k} V_{i+\frac{1}{2},j,k} u_{i+\frac{1}{2},j,k} \right) = \sum_{i,j,k} V_{i+\frac{1}{2},j,k} \Delta u_{i+\frac{1}{2},j,k} = 0,
 \end{equation}
 which means (\ref{eq:disc_diff_u}) conserves volume-weighed total $u$.
 
@@ -280,15 +281,15 @@ Increments of $v_{i,j+\frac{1}{2},k}$ and $w_{i,j,k+\frac{1}{2}}$ are calculated
                                         }{ V_{i,j,k+\frac{1}{2}} } \Delta t,
   \label{eq:disc_diff_w}
 \end{equation}
-Please see Figure\ref{fig:def_point_vflux} and Figure\ref{fig:def_point_wflux} for placement of each term in (\ref{eq:disc_diff_v}) and (\ref{eq:disc_diff_w}), respectively..
+Please see Figure\ref{fig:def_point_vflux} and Figure\ref{fig:def_point_wflux} for placement of each term in (\ref{eq:disc_diff_v}) and (\ref{eq:disc_diff_w}), respectively.
 Similarly, volume-weighed total $v$ and $w$ are conserved through the calculation.
 \vspace{-5pt}
 \begin{equation}
-  \Delta \left( \sum_{i,j} V_{i,j+\frac{1}{2},k} v_{i,j+\frac{1}{2},k} \right) = \sum_{i,j} V_{i,j+\frac{1}{2},k} \Delta v_{i,j+\frac{1}{2},k} = 0
+  \Delta \left( \sum_{i,j,k} V_{i,j+\frac{1}{2},k} v_{i,j+\frac{1}{2},k} \right) = \sum_{i,j,k} V_{i,j+\frac{1}{2},k} \Delta v_{i,j+\frac{1}{2},k} = 0
 \end{equation}
 \vspace{-5pt}
 \begin{equation}
-  \Delta \left( \sum_{i,j} V_{i,j,k+\frac{1}{2}} w_{i,j,k+\frac{1}{2}} \right) = \sum_{i,j} V_{i,j,k+\frac{1}{2}} \Delta w_{i,j,k+\frac{1}{2}} = 0
+  \Delta \left( \sum_{i,j,k} V_{i,j,k+\frac{1}{2}} w_{i,j,k+\frac{1}{2}} \right) = \sum_{i,j,k} V_{i,j,k+\frac{1}{2}} \Delta w_{i,j,k+\frac{1}{2}} = 0
 \end{equation}
 
 \begin{figure}[h]
@@ -517,7 +518,7 @@ Ignoring red colored terms, which are calculated not in the diffusion scheme but
   \label{eq:tensw}
 \end{equation}
 We can calculate the first and the second terms on the right hand side of (\ref{eq:tensu}), (\ref{eq:tensv}) and (\ref{eq:tensw}) in the same way as (\ref{eq:disc_diff_u}), (\ref{eq:disc_diff_v}) and (\ref{eq:disc_diff_w}), respectively, except for adding blue colored terms in $F^{u_i x_j}$.
-In the discritization of the third terms in (\ref{eq:tensu}), (\ref{eq:tensv}), we adopt a similar conservative way as follows:
+In the discritization of the third terms in (\ref{eq:tensu}), (\ref{eq:tensv}), we adopt a similar way so that it still conserves volume-weighed total $u$ and $v$:
 \vspace{-5pt}
 \begin{equation}
   -\frac{\partial F^{uz*}}{\partial z}_{i+\frac{1}{2},j,k} =
@@ -600,8 +601,8 @@ Please see Figure\ref{fig:def_point_zflux} for placement of each term in (\ref{e
 
 \section{Usage of function space}
 
-In the LFRic's source code, we use $W3$ function spaces for variables placed on the center of the cell, while we use $W1$ or shifted $W2H$ function space for variables placed on the edges of the cell.
-Each degree of freedom (dof) in $W1$ and shifted $W2H$ function space is placed as shown in Figure\ref{fig:dof}.
+In the LFRic's source code, we use $\mathbb{W}_3$ function spaces for variables placed at the center of the cell, while we use $\mathbb{W}_1$ or shifted $\mathbb{W}^H_2$ function space for variables placed on the edges of the cell.
+Each degree of freedom (dof) in $\mathbb{W}_1$ and shifted $\mathbb{W}_2^H$ function space is placed as shown in Figure\ref{fig:dof}.
 Function spaces used for each $F^{u_i x_j}$ is listed in table\ref{tab:def_pos}.
 As shown in table\ref{tab:def_pos}, we sometimes treat 2 variables together in a single variable (e.g. we treat $F^{uy}$ and $F^{uz*}$ in a single variable uflux\_w1).
 
@@ -612,13 +613,13 @@ As shown in table\ref{tab:def_pos}, we sometimes treat 2 variables together in a
  \hline
  Notation in this document & Placement        & Variable name in the source code & function space \\
  \hline\hline
- $F^{ux}$ & $(i,j,k)$                         & uflux\_w3                        & $W3$                           \\ \hline
- $F^{uy}$ & $(i+\frac{1}{2},j+\frac{1}{2},k)$ & \multirow{2}{*}{uflux\_w1}       & \multirow{2}{*}{$W1$}          \\ \cline{1-2}
+ $F^{ux}$ & $(i,j,k)$                         & uflux\_w3                        & $\mathbb{W}_3$                           \\ \hline
+ $F^{uy}$ & $(i+\frac{1}{2},j+\frac{1}{2},k)$ & \multirow{2}{*}{uflux\_w1}       & \multirow{2}{*}{$\mathbb{W}_1$}          \\ \cline{1-2}
  $F^{uz*}$& $(i+\frac{1}{2},j,k+\frac{1}{2})$ &                                  &                                \\ \hline
- $F^{vy}$ & $(i,j,k)$                         & vflux\_w3                        & $W3$                           \\ \hline
- $F^{vx}$ & $(i+\frac{1}{2},j+\frac{1}{2},k)$ & \multirow{2}{*}{vflux\_w1}       & \multirow{2}{*}{$W1$}          \\ \cline{1-2}
+ $F^{vy}$ & $(i,j,k)$                         & vflux\_w3                        & $\mathbb{W}_3$                           \\ \hline
+ $F^{vx}$ & $(i+\frac{1}{2},j+\frac{1}{2},k)$ & \multirow{2}{*}{vflux\_w1}       & \multirow{2}{*}{$\mathbb{W}_1$}          \\ \cline{1-2}
  $F^{vz*}$& $(i,j+\frac{1}{2},k+\frac{1}{2})$ &                                  &                                \\ \hline
- $F^{wx}$ & $(i+\frac{1}{2},j,k+\frac{1}{2})$ & \multirow{2}{*}{wflux\_sh\_w2h}  & \multirow{2}{*}{shifted $W2H$} \\ \cline{1-2}
+ $F^{wx}$ & $(i+\frac{1}{2},j,k+\frac{1}{2})$ & \multirow{2}{*}{wflux\_sh\_w2h}  & \multirow{2}{*}{shifted $\mathbb{W}_2^H$} \\ \cline{1-2}
  $F^{wy}$ & $(i,j+\frac{1}{2},k+\frac{1}{2})$ &                                  &                                \\ \hline
 \end{tabular}
 \caption{Placement and function space for each variable.}
@@ -649,7 +650,7 @@ As shown in table\ref{tab:def_pos}, we sometimes treat 2 variables together in a
     \node at (4.7,4.7) {11};
     \node at (3.4,5.4) {12};
   \end{tikzpicture}
-  \caption{placement of each dof in W1 space}
+  \caption{placement of each dof in $\mathbb{W}_1$ space}
   \label{fig:dof_w1}
 \end{subfigure}
 \hspace{15pt}
@@ -667,7 +668,7 @@ As shown in table\ref{tab:def_pos}, we sometimes treat 2 variables together in a
     \node at (4.7,0.7) {3};
     \node at (3.4,1.4) {4};
   \end{tikzpicture}
-  \caption{placement of each dof in shifted W2H space}
+  \caption{placement of each dof in shifted $\mathbb{W}^{H}_2$ space}
   \label{fig:dof_sh_w2h}
 \end{subfigure}
 \hspace{5pt}
@@ -682,6 +683,76 @@ As shown in table\ref{tab:def_pos}, we sometimes treat 2 variables together in a
 \caption{placement of dof}
 \label{fig:dof}
 \end{figure}
+
+\section{Point to note}
+
+\subsection{Rigor in other coordinates}
+
+Equations solved in this scheme holds in only cartesian coordinate, but LFRic also uses other coordinates such as cubes-sphere and rotated latitude-longitude coordinates.
+Strictly speaking, metric terms such as metric tensor and Christoffel symbols must be taken into account in other coordinates.
+
+\subsection{Non-conservation in nesting run.}
+
+This scheme is designed to calculate increments of outer most wind as 0 in the nesting run.
+This design is natural since outer most wind should be always equal as that of parent model in the nesting run.
+But we have to note this rigid bonudary condition breaks conservation of volume-weighed total $u, v$ and $w$ in nesting run while they are conserved rigorously in idealised simulation using periodic lateral boundary condition.
+For example, given $u_{i+\frac{1}{2},j,k}$ is located at the lateral boundary in $y$-direction as depected in Figure\ref{fig:lb}, we implicitly assume $F^{uy}_{i+\frac{1}{2},j+\frac{1}{2}}$, the lateral boundary condition of $u$, so that it satisfies:
+\begin{equation}
+  \Delta u_{i+\frac{1}{2},j,k} =
+  -\frac{\partial F^{ux}}{\partial x}_{i+\frac{1}{2},j,k}
+  -\frac{\partial F^{uy}}{\partial y}_{i+\frac{1}{2},j,k}
+  -\frac{\partial F^{uz*}}{\partial z}_{i+\frac{1}{2},j,k}
+  = 0,
+\end{equation}
+that is:
+\begin{equation*}
+  F^{uy}_{i+\frac{1}{2},j+\frac{1}{2},k} A^{y}_{i+\frac{1}{2},j+\frac{1}{2},k} =
+      F^{uy}_{i+\frac{1}{2},j-\frac{1}{2},k} A^{y}_{i+\frac{1}{2},j-\frac{1}{2},k}
+    - \left(
+      F^{ux}_{i+1,j,k} A^{x}_{i+1,j,k} - F^{ux}_{i,j,k} A^{x}_{i,j,k}
+      \right)
+\end{equation*}
+\begin{equation}
+    - \left(
+      F^{uz*}_{i+\frac{1}{2},j,k+\frac{1}{2}} A^{z}_{i+\frac{1}{2},j,k+\frac{1}{2}} - F^{uz*}_{i+\frac{1}{2},j,k-\frac{1}{2}} A^{z}_{i+\frac{1}{2},j,k-\frac{1}{2}}
+      \right)
+\end{equation}
+This non-zero term resides after summing up (\ref{eq:disc_diff_u}) and changes the total volume-weighed $u$.
+
+\begin{figure}[h]
+\centering
+\begin{subfigure}{0.3\linewidth}
+  \centering
+  \begin{tikzpicture}
+    \node at (-0.5,3.0) {boundary};
+    \draw (0.5,1.0) -- (3.5,1.0);
+    \draw (0.5,2.0) -- (3.5,2.0);
+    \draw[thick] (0.5,3.0) -- (3.5,3.0);
+
+    \draw (1.0,0.5) -- (1.0,3.0);
+    \draw (2.0,0.5) -- (2.0,3.0);
+    \draw (3.0,0.5) -- (3.0,3.0);
+
+    \fill (2.0,3.0) circle (2pt);
+    \node at (2.0,3.4) {$F^{uy}_{i+\frac{1}{2},j+\frac{1}{2},k}$};
+
+    \fill (2.0,2.5) circle (2pt);
+    \node at (2.0,2.7) {$u_{i+\frac{1}{2},j,k}$};
+
+  \end{tikzpicture}
+\hspace{5pt}
+\end{subfigure}
+\begin{subfigure}{0.2\linewidth}
+  \vspace{-10pt}
+  \begin{tikzpicture}
+    \draw[->] (-0.5,0) -- (2.0,0.0) node[right] {$x$};
+    \draw[->] (0,-0.5) -- (0.0,2.0) node[right] {$y$};
+  \end{tikzpicture}
+\end{subfigure}
+\caption{Horizontal cross section close to the lateral boundary}
+\label{fig:lb}
+\end{figure}
+
 
 
 \bibliographystyle{plain}
